@@ -33,10 +33,19 @@
 		.not-allowed {cursor: not-allowed;}
 		.progress {cursor: progress;}
 	</style>
+		<nav>
+			<ul>
+                <li><a href="index.html">Home</a></li>
+				<li><a href="news.html">News</a></li>
+				<li><a href="spoonfeeds.html">Spoonfeeds</a></li>
+				<li><a href="links.html">Links</a></li>
+			</ul>
+		</nav>
+		<center><img class="none" src="https://1.bp.blogspot.com/-enKQt7mo1gc/UhDRiaFxjiI/AAAAAAAAARQ/OvuixQFmwd8/s1600/punisher.jpg" alt="greenskullmatrix" height="360" width="600" > </center>
 	</head>
 	<body>
 	<h1 class="none" style="text-align: center;">Cy6or9's </h1>
-	<center><img class="none" src="https://1.bp.blogspot.com/-enKQt7mo1gc/UhDRiaFxjiI/AAAAAAAAARQ/OvuixQFmwd8/s1600/punisher.jpg" alt="greenskullmatrix" height="360" width="600" > </center>
+	
 		<nav>
 			<ul>
                 <li><a href="index.html">Home</a></li>
@@ -47,10 +56,10 @@
 		</nav>
 	<h4 class="none" style="text-align: left;"></h4>
 	<h1 class="none" style="text-align: center;">Cyber Blog's</h1>
-		<p class="none" style="background-color:black; opacity:.7;">Hello I'm Cy6or9, Welcome to my Cyber Blogs. In my free time I'm a security specialist that tests exploits on
+		<p class="none" style="background-color:black; opacity:.7;">-Hello I'm Cy6or9, Welcome to my Cyber Blogs. In my free time I'm a security specialist that tests exploits on
 		myself and other colleagues to make people aware of the dangers in not practicing better security techniques. 
 		Here you'll find news and some of my own twists to some major exploits, amongst other things. Feel free to bookmark
-		this page to stay tuned to my cyber adventures. Enjoy!</p>
+		this page to stay tuned to my cyber adventures. Enjoy!- </p>
 		<p style="text-align: center;"> Posted: 3/01/20 </p>
 		<nav>
 			<ul>
@@ -61,7 +70,40 @@
 			</ul>
 		</nav>		
 	</body>
-	<footer class="progress"  color="#16f626" style="text-align: center;">I make websites for $. contact me at cy6or9@yahoo.com if interested.
+	<footer class="progress"  color="#16f626" style="text-align: center;">
+	<script>
+	var counter_list = [10,10000,10000];
+	var str_counter_0 = counter_list[0];
+	var str_counter_1 = counter_list[1];
+	var str_counter_2 = counter_list[2];
+	var display_str = "";
+	var display_div = document.getElementById("display_div_id");
+
+	function incrementCount(current_count){
+		setInterval(function(){
+		// clear count
+		while (display_div.hasChildNodes()) {
+          display_div.removeChild(display_div.lastChild);
+		}
+		str_counter_0++;
+		if (str_counter_0 > 99) {
+			str_counter_0 = 10; // reset count
+			str_counter_1++;    // increase next count
+		}
+		if(str_counter_1>99999){
+			str_counter_2++;
+		}
+		display_str = str_counter_2.toString() + str_counter_1.toString() + str_counter_0.toString();
+		for (var i = 0; i < display_str.length; i++) {
+			var new_span = document.createElement('span');
+			new_span.className = 'num_tiles';
+			new_span.innerText = display_str[i];
+			display_div.appendChild(new_span);
+      }
+		},1000);
+	}
+	</script>
+		I make websites for $. contact me at cy6or9@yahoo.com if interested.
 	</footer>
 	</html>
 	
