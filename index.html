@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TradeTrends</title>
+
+    <!-- Firebase and other necessary libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -15,48 +17,84 @@
             background-color: #121212;
             color: cyan;
             text-align: center;
+            margin: 0;
+            padding: 0;
         }
+
         h1 {
             margin: 20px;
+            font-size: 32px;
         }
-        input, button {
+
+        .container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        input,
+        button {
             margin: 10px;
             padding: 10px;
             font-size: 16px;
-        }
-        .stock-info, .filters {
-            margin-top: 20px;
-        }
-        .stock-info {
-            padding: 10px;
-            margin: 10px;
             border: 1px solid cyan;
+            border-radius: 5px;
+            background-color: #1a1a1a;
+            color: cyan;
         }
+
+        button:hover {
+            background-color: cyan;
+            color: #121212;
+        }
+
+        .stock-info {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+
         .loading {
             font-size: 18px;
             color: white;
+        }
+
+        .ai-section {
+            margin-top: 20px;
+        }
+
+        .response {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        .response-error {
+            color: red;
         }
     </style>
 </head>
 
 <body>
-    <h1>TradeTrends - Stocks with High Analyst Ratings</h1>
+    <h1>TradeTrends AI</h1>
 
-    <!-- Filters -->
-    <div class="filters">
-        <label>Filter by Price:</label>
-        <input type="number" id="minPrice" placeholder="Min Price">
-        <input type="number" id="maxPrice" placeholder="Max Price">
-        <label>Filter by Volume:</label>
-        <input type="number" id="minVolume" placeholder="Min Volume">
-        <button onclick="applyFilters()">Apply Filters</button>
+    <div class="container">
+        <!-- Stock Data Input Section -->
+        <div>
+            <input type="text" id="stockSymbol" placeholder="Enter Stock Symbol (e.g., AAPL)">
+            <button onclick="getStockData()">Get Stock Data</button>
+            <div id="stockData" class="stock-info"></div>
+        </div>
+
+        <!-- AI Assistant Section -->
+        <div class="ai-section">
+            <input type="text" id="aiQuestion" placeholder="Ask AI about stocks">
+            <button onclick="askAI()">Ask</button>
+            <div id="aiResponse" class="loading">Loading AI response...</div>
+        </div>
     </div>
 
-    <div id="stockList"></div>
-    <div id="aiResponse" class="loading">Loading AI response...</div>
-
+    <!-- Firebase and API Integration Scripts -->
     <script>
-        // Firebase Config (Use your own Firebase configuration here)
+        // Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyAUU-nZOb6jP1KgDAodB3c_PK7VLmFFdcc",
             authDomain: "tradetrends-89a9d.firebaseapp.com",
@@ -73,112 +111,61 @@
         // Finnhub API Key and Base URL
         const FINNHUB_API_KEY = 'cuvuc2hr01qub8tvmkrgcuvuc2hr01qub8tvmks0';
         const FINNHUB_URL = 'https://finnhub.io/api/v1/quote';
-        const FINNHUB_RATING_URL = 'https://finnhub.io/api/v1/stock/metric';
 
-        // Predefined list of stock symbols (you can change this or fetch dynamically)
-        const stockSymbols = ["AAPL", "GOOG", "AMZN", "TSLA", "MSFT", "NFLX"];
+        // Fetch stock data from Finnhub
+        async function getStockData() {
+            const symbol = document.getElementById("stockSymbol").value;
+            if (!symbol) {
+                alert("Please enter a stock symbol.");
+                return;
+            }
 
-        // Fetch and display stock data for each symbol
-        async function fetchStockData(symbol) {
             try {
-                // Fetch price data
-                const priceData = await axios.get(`${FINNHUB_URL}?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
-                
-                // Fetch analyst ratings data
-                const ratingData = await axios.get(`${FINNHUB_RATING_URL}?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
-
-                // Check if the stock meets the rating threshold (75%)
-                if (ratingData.data.analystRatings >= 75) {
-                    return {
-                        symbol: symbol,
-                        price: priceData.data.c,
-                        high: priceData.data.h,
-                        low: priceData.data.l,
-                        close: priceData.data.pc,
-                        rating: ratingData.data.analystRatings,
-                        volume: priceData.data.v // Assuming volume data is available here
-                    };
-                }
-                return null;
+                const response = await axios.get(`${FINNHUB_URL}?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+                const data = response.data;
+                const stockInfo = `
+                    <h2>Stock Information</h2>
+                    <p><strong>Symbol:</strong> ${symbol}</p>
+                    <p><strong>Current Price:</strong> $${data.c}</p>
+                    <p><strong>High Price Today:</strong> $${data.h}</p>
+                    <p><strong>Low Price Today:</strong> $${data.l}</p>
+                    <p><strong>Previous Close:</strong> $${data.pc}</p>
+                `;
+                document.getElementById("stockData").innerHTML = stockInfo;
             } catch (error) {
                 console.error("Error fetching stock data:", error);
-                return null;
+                alert("Failed to fetch stock data.");
             }
         }
 
-        // Display the list of stocks
-        async function displayStocks() {
-            const stockListContainer = document.getElementById("stockList");
-            let stocks = [];
-
-            // Fetch data for all stock symbols
-            for (let symbol of stockSymbols) {
-                const stockData = await fetchStockData(symbol);
-                if (stockData) {
-                    stocks.push(stockData);
-                }
+        // AI Assistant Feature (Question Handling)
+        async function askAI() {
+            const question = document.getElementById("aiQuestion").value;
+            if (!question) {
+                alert("Please enter a question.");
+                return;
             }
 
-            // Sort stocks by rating (descending order)
-            stocks.sort((a, b) => b.rating - a.rating);
-
-            // Display the sorted stocks
-            stockListContainer.innerHTML = "";
-            stocks.forEach(stock => {
-                const stockInfo = `
-                    <div class="stock-info">
-                        <h2>${stock.symbol}</h2>
-                        <p><strong>Price:</strong> $${stock.price}</p>
-                        <p><strong>High Today:</strong> $${stock.high}</p>
-                        <p><strong>Low Today:</strong> $${stock.low}</p>
-                        <p><strong>Previous Close:</strong> $${stock.close}</p>
-                        <p><strong>Analyst Rating:</strong> ${stock.rating}%</p>
-                        <p><strong>Volume:</strong> ${stock.volume}</p>
-                    </div>
-                `;
-                stockListContainer.innerHTML += stockInfo;
-            });
+            try {
+                const response = await fetchAIResponse(question);
+                document.getElementById("aiResponse").innerText = response;
+            } catch (error) {
+                console.error("Error fetching AI response:", error);
+                document.getElementById("aiResponse").innerText = "Sorry, we couldn't process your request.";
+            }
         }
 
-        // Apply Filters
-        function applyFilters() {
-            const minPrice = document.getElementById("minPrice").value;
-            const maxPrice = document.getElementById("maxPrice").value;
-            const minVolume = document.getElementById("minVolume").value;
+        // Fetch AI response from Firestore (Simulated)
+        async function fetchAIResponse(question) {
+            const docRef = db.collection("ai_responses").doc("sample_question");
+            const doc = await docRef.get();
 
-            let filteredStocks = stocks.filter(stock => {
-                if (minPrice && stock.price < minPrice) return false;
-                if (maxPrice && stock.price > maxPrice) return false;
-                if (minVolume && stock.volume < minVolume) return false;
-                return true;
-            });
-
-            displayFilteredStocks(filteredStocks);
+            if (doc.exists) {
+                return doc.data().response; // Replace with real AI logic
+            } else {
+                return "No AI response available.";
+            }
         }
-
-        // Display Filtered Stocks
-        function displayFilteredStocks(filteredStocks) {
-            const stockListContainer = document.getElementById("stockList");
-            stockListContainer.innerHTML = "";
-
-            filteredStocks.forEach(stock => {
-                const stockInfo = `
-                    <div class="stock-info">
-                        <h2>${stock.symbol}</h2>
-                        <p><strong>Price:</strong> $${stock.price}</p>
-                        <p><strong>High Today:</strong> $${stock.high}</p>
-                        <p><strong>Low Today:</strong> $${stock.low}</p>
-                        <p><strong>Previous Close:</strong> $${stock.close}</p>
-                        <p><strong>Analyst Rating:</strong> ${stock.rating}%</p>
-                        <p><strong>Volume:</strong> ${stock.volume}</p>
-                    </div>
-                `;
-                stockListContainer.innerHTML += stockInfo;
-            });
-        }
-
-        // Initialize
-        window.onload = displayStocks;
     </script>
 </body>
 
