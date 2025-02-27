@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TradeTrends</title>
-
     <!-- Firebase and other necessary libraries -->
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-
+    <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,20 +19,16 @@
             margin: 0;
             padding: 0;
         }
-
         h1 {
             margin: 20px;
             font-size: 32px;
         }
-
         .container {
             padding: 20px;
             max-width: 800px;
             margin: 0 auto;
         }
-
-        input,
-        button {
+        input, button {
             margin: 10px;
             padding: 10px;
             font-size: 16px;
@@ -42,40 +37,44 @@
             background-color: #1a1a1a;
             color: cyan;
         }
-
         button:hover {
             background-color: cyan;
             color: #121212;
         }
-
         .stock-info {
             margin-top: 20px;
             font-size: 18px;
         }
-
         .loading {
             font-size: 18px;
             color: white;
         }
-
         .ai-section {
             margin-top: 20px;
         }
-
         .response {
             margin-top: 10px;
             font-size: 18px;
         }
-
         .response-error {
             color: red;
         }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid cyan;
+        }
+        th {
+            cursor: pointer;
+        }
     </style>
 </head>
-
 <body>
     <h1>TradeTrends AI</h1>
-
     <div class="container">
         <!-- Stock Data Input Section -->
         <div>
@@ -83,15 +82,33 @@
             <button onclick="getStockData()">Get Stock Data</button>
             <div id="stockData" class="stock-info"></div>
         </div>
-
         <!-- AI Assistant Section -->
         <div class="ai-section">
             <input type="text" id="aiQuestion" placeholder="Ask AI about stocks">
             <button onclick="askAI()">Ask</button>
             <div id="aiResponse" class="loading">Loading AI response...</div>
         </div>
+        <!-- Stock Table Section -->
+        <table id="stockTable" class="display">
+            <thead>
+                <tr>
+                    <th>Symbol</th>
+                    <th>Analyst Rating (%)</th>
+                    <th>Price</th>
+                    <th>Volume</th>
+                    <th>1 Day % Change</th>
+                    <th>1 Week % Change</th>
+                    <th>1 Month % Change</th>
+                    <th>3 Months % Change</th>
+                    <th>YTD % Change</th>
+                    <th>1 Year % Change</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data will be populated here -->
+            </tbody>
+        </table>
     </div>
-
     <!-- Firebase and API Integration Scripts -->
     <script>
         // Firebase Config
@@ -99,29 +116,25 @@
             apiKey: "AIzaSyAUU-nZOb6jP1KgDAodB3c_PK7VLmFFdcc",
             authDomain: "tradetrends-89a9d.firebaseapp.com",
             projectId: "tradetrends-89a9d",
-            storageBucket: "tradetrends-89a9d.firebasestorage.app",
+            storageBucket: "tradetrends-89a9d.appspot.com",
             messagingSenderId: "990950180616",
             appId: "1:990950180616:web:ddadabd319d9c188a78ebd"
         };
-
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore(app);
-
         // Finnhub API Key and Base URL
         const FINNHUB_API_KEY = 'cuvuc2hr01qub8tvmkrgcuvuc2hr01qub8tvmks0';
-        const FINNHUB_URL = 'https://finnhub.io/api/v1/quote';
-
+        const FINNHUB_URL = 'https://finnhub.io/api/v1/';
         // Fetch stock data from Finnhub
         async function getStockData() {
-            const symbol = document.getElementById("stockSymbol").value;
+            const symbol = document.getElementById("stockSymbol").value.toUpperCase();
             if (!symbol) {
                 alert("Please enter a stock symbol.");
                 return;
             }
-
             try {
-                const response = await axios.get(`${FINNHUB_URL}?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+                const response = await axios.get(`${FINNHUB_URL}quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
                 const data = response.data;
                 const stockInfo = `
                     <h2>Stock Information</h2>
@@ -132,41 +145,16 @@
                     <p><strong>Previous Close:</strong> $${data.pc}</p>
                 `;
                 document.getElementById("stockData").innerHTML = stockInfo;
-            } catch (error) {
-                console.error("Error fetching stock data:", error);
-                alert("Failed to fetch stock data.");
-            }
-        }
-
-        // AI Assistant Feature (Question Handling)
-        async function askAI() {
-            const question = document.getElementById("aiQuestion").value;
-            if (!question) {
-                alert("Please enter a question.");
-                return;
-            }
-
-            try {
-                const response = await fetchAIResponse(question);
-                document.getElementById("aiResponse").innerText = response;
-            } catch (error) {
-                console.error("Error fetching AI response:", error);
-                document.getElementById("aiResponse").innerText = "Sorry, we couldn't process your request.";
-            }
-        }
-
-        // Fetch AI response from Firestore (Simulated)
-        async function fetchAIResponse(question) {
-            const docRef = db.collection("ai_responses").doc("sample_question");
-            const doc = await docRef.get();
-
-            if (doc.exists) {
-                return doc.data().response; // Replace with real AI logic
-            } else {
-                return "No AI response available.";
-            }
-        }
-    </script>
-</body>
-
-</html>
+                // Fetch and display analyst rating
+                const analystResponse = await axios.get(`${FINNHUB_URL}stock/recommendation?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+                const analystData = analystResponse.data[0];
+                if (analystData) {
+                    const analystRating = ((analystData.buy + analystData.strongBuy) / (analystData.buy + analystData.strongBuy + analystData.hold + analystData.sell + analystData.strongSell)) * 100;
+                    const row = `
+                        <tr>
+                            <td>${symbol}</td>
+                            <td>${analystRating.toFixed(2)}</td>
+                            <td>$${data.c}</td>
+                            <td>${data.v}</td>
+                            <td>${calculatePercentageChange(data.c, data.pc, 1)}</td>
+                            <6
