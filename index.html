@@ -128,23 +128,29 @@
         const FINNHUB_URL = 'https://finnhub.io/api/v1/';
         // Fetch stock data from Finnhub
         async function getStockData() {
-            const symbol = document.getElementById("stockSymbol").value.toUpperCase();
-            if (!symbol) {
-                alert("Please enter a stock symbol.");
-                return;
-            }
-            try {
-                const response = await axios.get(`${FINNHUB_URL}quote?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
-                const data = response.data;
-                const stockInfo = `
-                    <h2>Stock Information</h2>
-                    <p><strong>Symbol:</strong> ${symbol}</p>
-                    <p><strong>Current Price:</strong> $${data.c}</p>
-                    <p><strong>High Price Today:</strong> $${data.h}</p>
-                    <p><strong>Low Price Today:</strong> $${data.l}</p>
-                    <p><strong>Previous Close:</strong> $${data.pc}</p>
-                `;
-                document.getElementById("stockData").innerHTML = stockInfo;
+                const symbol = document.getElementById("stockSymbol").value;
+                if (!symbol) {
+                            alert("Please enter a stock symbol.");
+                            return;
+                }
+
+                try {
+                            const response = await axios.get(`${FINNHUB_URL}?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+                            const data = response.data;
+                            const stockInfo = `
+                                        <h2>Stock Information</h2>
+                                                    <p><strong>Symbol:</strong> ${symbol}</p>
+                                                                <p><strong>Current Price:</strong> $${data.c}</p>
+                                                                            <p><strong>High Price Today:</strong> $${data.h}</p>
+                                                                                        <p><strong>Low Price Today:</strong> $${data.l}</p>
+                                                                                                    <p><strong>Previous Close:</strong> $${data.pc}</p>
+                                                                                                            `;
+                            document.getElementById("stockData").innerHTML = stockInfo;
+                } catch (error) {
+                            console.error("Error fetching stock data:", error);
+                            alert("Failed to fetch stock data.");
+                }
+        }
                 // Fetch and display analyst rating
                 const analystResponse = await axios.get(`${FINNHUB_URL}stock/recommendation?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
                 const analystData = analystResponse.data[0];
