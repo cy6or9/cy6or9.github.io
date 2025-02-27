@@ -151,16 +151,29 @@
                             alert("Failed to fetch stock data.");
                 }
         }
-                // Fetch and display analyst rating
-                const analystResponse = await axios.get(`${FINNHUB_URL}stock/recommendation?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+        // Fetch and display analyst rating
+        try {
+                const analystResponse = await axios.get(`${FINNHUB_URL}/stock/recommendation?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
                 const analystData = analystResponse.data[0];
                 if (analystData) {
-                    const analystRating = ((analystData.buy + analystData.strongBuy) / (analystData.buy + analystData.strongBuy + analystData.hold + analystData.sell + analystData.strongSell)) * 100;
-                    const row = `
-                        <tr>
-                            <td>${symbol}</td>
-                            <td>${analystRating.toFixed(2)}</td>
-                            <td>$${data.c}</td>
-                            <td>${data.v}</td>
-                            <td>${calculatePercentageChange(data.c, data.pc, 1)}</td>
-                            <6
+                            const totalRatings = analystData.buy + analystData.strongBuy + analystData.hold + analystData.sell + analystData.strongSell;
+                            const buyPercentage = ((analystData.buy + analystData.strongBuy) / totalRatings) * 100;
+                            const sellPercentage = ((analystData.sell + analystData.strongSell) / totalRatings) * 100;
+                            const row = `
+                                        <tr>
+                                                        <td>${symbol}</td>
+                                                                        <td>${buyPercentage.toFixed(2)}% Buy</td>
+                                                                                        <td>${sellPercentage.toFixed(2)}% Sell</td>
+                                                                                                        <td>$${data.c}</td>
+                                                                                                                        <td>${data.v}</td>
+                                                                                                                                        <td>${calculatePercentageChange(data.c, data.pc, 1)}</td>
+                                                                                                                                                        <!-- Add additional cells for other percentage changes as needed -->
+                                                                                                                                                                    </tr>
+                                                                                                                                                                            `;
+                            document.querySelector('#stockTable tbody').insertAdjacentHTML('beforeend', row);
+                } else {
+                            console.error('No analyst data available for this symbol.');
+                }
+        } catch (error) {
+                console.error('Error fetching analyst data:', error);
+        }
