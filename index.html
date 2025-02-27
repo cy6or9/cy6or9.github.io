@@ -17,21 +17,58 @@
             background-color: #121212;
             color: cyan;
             text-align: center;
+            margin: 0;
+            padding: 0;
         }
+
         h1 {
             margin: 20px;
+            font-size: 32px;
         }
-        input, button {
+
+        .container {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        input,
+        button {
             margin: 10px;
             padding: 10px;
             font-size: 16px;
+            border: 1px solid cyan;
+            border-radius: 5px;
+            background-color: #1a1a1a;
+            color: cyan;
         }
-        .stock-info, .favorites {
+
+        button:hover {
+            background-color: cyan;
+            color: #121212;
+        }
+
+        .stock-info {
             margin-top: 20px;
+            font-size: 18px;
         }
+
         .loading {
             font-size: 18px;
             color: white;
+        }
+
+        .ai-section {
+            margin-top: 20px;
+        }
+
+        .response {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+
+        .response-error {
+            color: red;
         }
     </style>
 </head>
@@ -39,38 +76,40 @@
 <body>
     <h1>TradeTrends AI</h1>
 
-    <div>
-        <input type="text" id="stockSymbol" placeholder="Enter Stock Symbol (e.g., AAPL)">
-        <button onclick="getStockData()">Get Stock Data</button>
-        <div id="stockData"></div>
-        <div id="aiResponse" class="loading">Loading AI response...</div>
+    <div class="container">
+        <!-- Stock Data Input Section -->
+        <div>
+            <input type="text" id="stockSymbol" placeholder="Enter Stock Symbol (e.g., AAPL)">
+            <button onclick="getStockData()">Get Stock Data</button>
+            <div id="stockData" class="stock-info"></div>
+        </div>
+
+        <!-- AI Assistant Section -->
+        <div class="ai-section">
+            <input type="text" id="aiQuestion" placeholder="Ask AI about stocks">
+            <button onclick="askAI()">Ask</button>
+            <div id="aiResponse" class="loading">Loading AI response...</div>
+        </div>
     </div>
 
-    <!-- AI Assistant Input -->
-    <div>
-        <input type="text" id="aiQuestion" placeholder="Ask AI about stocks">
-        <button id="askButton" onclick="askAI()">Ask</button>
-    </div>
-
-    <!-- Firebase Integration & Stock Fetching -->
+    <!-- Firebase and API Integration Scripts -->
     <script>
         // Firebase Config
         const firebaseConfig = {
-          apiKey: "AIzaSyAUU-nZOb6jP1KgDAodB3c_PK7VLmFFdcc",
-          authDomain: "tradetrends-89a9d.firebaseapp.com",
-          projectId: "tradetrends-89a9d",
-          storageBucket: "tradetrends-89a9d.firebasestorage.app",
-          messagingSenderId: "990950180616",
-          appId: "1:990950180616:web:ddadabd319d9c188a78ebd",
-          measurementId: "G-JP0GCH7QWZ"
-};
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore(app);
 
         // Finnhub API Key and Base URL
-        const FINNHUB_API_KEY = 'cuvuc2hr01qub8tvmkrgcuvuc2hr01qub8tvmks0';
+        const FINNHUB_API_KEY = 'YOUR_FINNHUB_API_KEY';
         const FINNHUB_URL = 'https://finnhub.io/api/v1/quote';
 
         // Fetch stock data from Finnhub
