@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeTrends</title>
+
+    <!-- Firebase and other necessary libraries -->
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: cyan;
+            text-align: center;
+        }
+        h1 {
+            margin: 20px;
+        }
+        input, button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .stock-info, .favorites {
+            margin-top: 20px;
+        }
+        .loading {
+            font-size: 18px;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>TradeTrends AI</h1>
+
+    <div>
+        <input type="text" id="stockSymbol" placeholder="Enter Stock Symbol (e.g., AAPL)">
+        <button onclick="getStockData()">Get Stock Data</button>
+        <div id="stockData"></div>
+        <div id="aiResponse" class="loading">Loading AI response...</div>
+    </div>
+
+    <!-- AI Assistant Input -->
+    <div>
+        <input type="text" id="aiQuestion" placeholder="Ask AI about stocks">
+        <button id="askButton" onclick="askAI()">Ask</button>
+    </div>
+
+    <!-- Firebase Integration & Stock Fetching -->
+    <script>
+        // Firebase Config
+        const firebaseConfig = {
+          apiKey: "AIzaSyAUU-nZOb6jP1KgDAodB3c_PK7VLmFFdcc",
+          authDomain: "tradetrends-89a9d.firebaseapp.com",
+          projectId: "tradetrends-89a9d",
+          storageBucket: "tradetrends-89a9d.firebasestorage.app",
+          messagingSenderId: "990950180616",
+          appId: "1:990950180616:web:ddadabd319d9c188a78ebd",
+          measurementId: "G-JP0GCH7QWZ"
+};
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(app);
+
+        // Finnhub API Key and Base URL
+        const FINNHUB_API_KEY = 'cuvuc2hr01qub8tvmkrgcuvuc2hr01qub8tvmks0';
+        const FINNHUB_URL = 'https://finnhub.io/api/v1/quote';
+
+        // Fetch stock data from Finnhub
+        async function getStockData() {
+            const symbol = document.getElementById("stockSymbol").value;
+            if (!symbol) {
+                alert("Please enter a stock symbol.");
+                return;
+            }
+
+            try {
+                const response = await axios.get(`${FINNHUB_URL}?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+                const data = response.data;
+                const stockInfo = `
+                    <h2>Stock Information</h2>
+                    <p><strong>Symbol:</strong> ${symbol}</p>
+                    <p><strong>Current Price:</strong> $${data.c}</p>
+                    <p><strong>High Price Today:</strong> $${data.h}</p>
+                    <p><strong>Low Price Today:</strong> $${data.l}</p>
+                    <p><strong>Previous Close:</strong> $${data.pc}</p>
+                `;
+                document.getElementById("stockData").innerHTML = stockInfo;
+            } catch (error) {
+                console.error("Error fetching stock data:", error);
+                alert("Failed to fetch stock data.");
+            }
+        }
+
+        // AI Assistant Feature (Question Handling)
+        async function askAI() {
+            const question = document.getElementById("aiQuestion").value;
+            if (!question) {
+                alert("Please enter a question.");
+                return;
+            }
+
+            try {
+                const response = await fetchAIResponse(question);
+                document.getElementById("aiResponse").innerText = response;
+            } catch (error) {
+                console.error("Error fetching AI response:", error);
+                document.getElementById("aiResponse").innerText = "Sorry, we couldn't process your request.";
+            }
+        }
+
+        // Fetch AI response from Firestore (Simulated)
+        async function fetchAIResponse(question) {
+            const docRef = db.collection("ai_responses").doc("sample_question");
+            const doc = await docRef.get();
+
+            if (doc.exists) {
+                return doc.data().response; // Replace with real AI logic
+            } else {
+                return "No AI response available.";
+            }
+        }
+    </script>
+</body>
+
+</html>
